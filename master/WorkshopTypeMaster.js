@@ -1,0 +1,177 @@
+import { Avatar, Box, Button, Dialog, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, TablePagination, Typography } from "@mui/material/";
+import { SearchBar } from "components/custom";
+import { usePopover } from "components/custom-popover";
+import GoogleMaterialIcon from "components/google-icon";
+import Scrollbar from "components/scrollbar";
+import useApi from "hooks/useApi";
+import { useTranslate } from "locales";
+import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
+import { getFirstCharacter } from "utils/avatarUtil";
+import { API_PAGE_LIMIT, SMALL_MODAL, WORKSHOP_TYPE } from "utils/constant";
+
+const CreateDealerShipTypeModal = dynamic(() => import("sections/setting/company/dealershipTypes/modal/CreateDealerShipTypeModal"));
+const MasterItemEmpty = dynamic(() => import("components/skeleton/MasterItemEmpty"));
+const MasterItemSkeleton = dynamic(() => import("components/skeleton/MasterItemSkeleton"));
+const CustomPopover = dynamic(() => import("components/custom-popover/custom-popover"));
+
+
+export default function WorkshopTypeMaster({ open, onClose, NeedtoSelect = false, selectedItem = [] }) {
+    const { t } = useTranslate()
+
+    const { getApiData, apiCalling, } = useApi();
+    const controller = new AbortController();
+    const { signal } = controller;
+    const [curentPage, setCurentPage] = useState(0);
+    const [totalPage, setTotalPage] = useState(0);
+    const [page, setPage] = useState(0);
+    const [responseList, setResponseList] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [update, setUpdate] = useState(false);
+    const [search, setSearch] = useState("");
+
+    async function GetList() {
+        try {
+            setLoading(true);
+            const params = { take: API_PAGE_LIMIT, skip: curentPage, search_keyword: search };
+            const response = await getApiData(WORKSHOP_TYPE.get, params, signal);
+            setTotalPage(~~response.data.count);
+            setResponseList(response.data.result);
+            setLoading(false);
+        } catch (error) {
+            console.error(error);
+            setLoading(false);
+        }
+    }
+    useEffect(() => {
+        GetList();
+        return () => {
+            controller.abort();
+        };
+    }, [open, curentPage, search]);
+    useEffect(() => {
+        setCurentPage(0);
+        setPage(0);
+        setResponseList([]);
+        setLoading(true);
+    }, [search]);
+    const handleChangePage = (event, newPage) => {
+        setPage(~~newPage);
+        setCurentPage(~~newPage * ~~API_PAGE_LIMIT);
+    };
+    const [addModal, setAddModal] = useState({ status: false, data: "" });
+    async function addModalClose(value) {
+        if (value.update) {
+            GetList();
+            setUpdate(value.update);
+        }
+        setAddModal({ status: false, data: "" });
+    }
+    async function updateSetAsDefault(data) {
+        try {
+            setLoading(true);
+            await apiCalling({ url: WORKSHOP_TYPE.updateAsDefault + data?.workshop_type_id, method: 'put', })
+            const updatedValue = data?.set_as_default === "no" ? "yes" : "no";
+            setResponseList((responseList) => responseList.map((item) => ({ ...item, set_as_default: item.workshop_type_id === data?.workshop_type_id ? updatedValue : "no", })));
+            setLoading(false);
+            setUpdate(true);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    return (
+        <>
+            <Dialog
+                fullWidth
+                maxWidth={SMALL_MODAL}
+                open={open}
+                onClose={() => onClose({ status: false, data: "", update: update })}
+                sx={{ "& .MuiPaper-root": { width: "100%", height: { xs: "90%", md: "100%" }, }, }}
+            >
+                <Box display={"flex"} flexDirection={"column"} minHeight={0} flex={1}>
+                    <Box sx={{ p: 2, borderBottom: "1px solid", borderColor: "divider", }}>
+                        <Box display={"flex"} flexDirection={"row"} justifyContent={"space-between"} alignItems={"center"} pb={1}>
+                            <Typography variant={"h6"}>{t("dealership_type")} </Typography>
+                            <Box columnGap={2} display={"flex"} alignItems="center">
+                                <Button color="primary" variant="contained" startIcon={<GoogleMaterialIcon icon='add' />} onClick={() => setAddModal({ status: true, data: "" })}>
+                                    {t("new")}
+                                </Button>
+                                <IconButton aria-label="close modal" onClick={() => onClose({ status: false, data: "", update: update, })}>
+                                    <GoogleMaterialIcon icon='close' />
+                                </IconButton>
+                            </Box>
+                        </Box>
+                        <SearchBar searchWord={search} setSearchWord={setSearch} fullWidth />
+
+                    </Box>
+                    <Box sx={{ overflow: "hidden", flex: 1 }}>
+                        <Scrollbar>
+                            <List sx={{ py: 0 }}>
+                                {loading ? (
+                                    <MasterItemSkeleton />
+                                ) : responseList.length > 0 ? (
+                                    responseList.map((row, index) => (
+                                        <WorkshopTypeMasterRow
+                                            key={index}
+                                            selectedItem={selectedItem.map((item) => item.workshop_type_id)}
+                                            row={row}
+                                            onEdit={() => setAddModal({ status: true, data: row, })}
+                                            setAsDefault={() => updateSetAsDefault(row)}
+                                            onView={() => NeedtoSelect && onClose({ status: false, data: row, })}
+                                        />
+                                    ))
+                                ) : (
+                                    <MasterItemEmpty isNotFound={true} />
+                                )}
+                            </List>
+                        </Scrollbar>
+                    </Box>
+                    <Box sx={{ width: "100%", borderTop: (theme) => `solid 1px ${theme.palette.divider}`, }}>
+                        <TablePagination rowsPerPageOptions={[~~API_PAGE_LIMIT]} component="div" count={totalPage} page={page} onPageChange={handleChangePage} rowsPerPage={~~API_PAGE_LIMIT} showFirstButton showLastButton />
+                    </Box>
+                </Box>
+            </Dialog>
+            {addModal.status && <CreateDealerShipTypeModal open={addModal.status} onClose={addModalClose} referenceData={addModal.data} />}
+        </>
+    );
+}
+
+
+export function WorkshopTypeMasterRow({ row, selectedItem, onView, onEdit, setAsDefault }) {
+    const { title, media_url = '', workshop_type_id, set_as_default } = row;
+
+    const popover = usePopover();
+    const { t } = useTranslate()
+
+    return (
+        <>
+            <ListItem disablePadding>
+                <ListItemButton selected={selectedItem.includes(workshop_type_id)} onClick={onView}>
+                    <ListItemIcon>
+                        {selectedItem.includes(workshop_type_id) ?
+                            <Box sx={{ width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", }}><GoogleMaterialIcon icon='check' /></Box>
+                            : <Avatar alt={title} src={media_url} sx={{ p: 1, bgcolor: "background.paper" }}>{getFirstCharacter(title)}</Avatar>
+                        }
+                    </ListItemIcon>
+                    <ListItemText
+                        primaryTypographyProps={{ typography: "body2", mb: 0.25, }}
+                        secondaryTypographyProps={{ typography: "caption" }}
+                        primary={title}
+                    />
+                    {set_as_default == "yes" && <GoogleMaterialIcon icon='star' filled sx={{ color: 'primary.main' }} />}
+                    <IconButton color={popover.open ? "inherit" : "default"} onClick={(e) => { e.stopPropagation(); popover.onOpen(e); }}>
+                        <GoogleMaterialIcon icon='more_vert' />
+                    </IconButton>
+                </ListItemButton>
+            </ListItem>
+            <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top">
+                <MenuItem onClick={(e) => { setAsDefault(); popover.onClose(); }}>
+                    {set_as_default == "yes" ? <GoogleMaterialIcon icon='star' filled /> : <GoogleMaterialIcon icon='star' />}
+                    {set_as_default == "yes" ? t("remove_as_default") : t("set_as_default")}
+                </MenuItem>
+                <MenuItem onClick={(e) => { onEdit(); popover.onClose(); }}><GoogleMaterialIcon icon={'edit'} />{t("edit")}</MenuItem>
+            </CustomPopover>
+        </>
+    );
+}
