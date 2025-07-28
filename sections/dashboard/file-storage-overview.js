@@ -15,7 +15,7 @@ import { fData } from 'utils/format-number';
 export default function FileStorageOverview({ data, total, chart, ...other }) {
   const theme = useTheme();
 
-  const { colors = [theme.palette.info.main, theme.palette.info.dark], series, options } = chart;
+  const { colors = ['#FFCD71', '#FFCD71'], series, options } = chart;
 
   const chartOptions = useChart({
     chart: {
