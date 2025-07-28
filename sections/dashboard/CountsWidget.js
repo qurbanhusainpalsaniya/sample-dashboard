@@ -57,9 +57,9 @@ export default function CountsWidget({
       )} */}
       <Typography variant="subtitle1">{title}</Typography>
 
-      <Typography mt={2} color='primary.main' variant="h3">{name}</Typography>
+      <Typography mt={2} color='primary.main' variant="h5">{name}</Typography>
 
-      <Typography color='primary.main' variant="body1">
+      <Typography color='primary.main' variant="caption">
         {description}
       </Typography>
     </Stack>
