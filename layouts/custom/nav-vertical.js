@@ -30,7 +30,7 @@ export default function NavVertical({ openNav, onCloseNav }) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pathname]);
 
-    const imageSrc = theme.palette.mode === 'dark' ? '/assets/images/reownx-dark.svg' : '/assets/images/reownx-light.svg';
+    const imageSrc = theme.palette.mode === 'dark' ? '/assets/Logo.png' : '/assets/Logo.png';
 
     const renderContent = (
         <>
@@ -43,8 +43,8 @@ export default function NavVertical({ openNav, onCloseNav }) {
             >
                 <Box px={1} pt={1.5} mx={2}>
                     <Box display={'flex'} justifyContent={'start'}>
-                        {/* <Image src={imageSrc} alt={APP_NAME} sx={{ height: 32 }} /> */}
-                        <Typography variant="h3">Dashbaord</Typography>
+                        <Image src={imageSrc} alt={APP_NAME} sx={{ height: 40 }} />
+                        {/* <Typography variant="h3">Dashbaord</Typography> */}
                     </Box>
                 </Box>
                 {/* Multiple Companies */}

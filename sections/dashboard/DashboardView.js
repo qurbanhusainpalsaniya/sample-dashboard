@@ -4,7 +4,7 @@ import React from 'react'
 import Grid from '@mui/material/Grid2';
 import { useTranslate } from 'locales';
 import { paths } from 'routes/paths';
-import { Avatar, Box, Chip, Container, Stack, Typography } from '@mui/material';
+import { Avatar, Box, Chip, Container, Stack, Tooltip, Typography } from '@mui/material';
 import FileStorageOverview from './file-storage-overview';
 import AppNewInvoice from './app-new-invoice';
 import AppCustomerList from './app-new-invoice';
@@ -190,13 +190,45 @@ export default function DashboardView() {
 
                         <Typography variant="subtitle1">2 unread messages</Typography>
 
-                        <Box sx={{ display: 'flex', mt: 2, color: 'primary.main', alignItems: 'center' }}>
-                            <Avatar src={'R'} alt={'R'} sx={{ mr: 2 }} />
-                            <Avatar src={'S'} alt={'S'} sx={{ mr: 2 }} />
-                            <Avatar src={'M'} alt={'M'} sx={{ mr: 2 }} />
-                            <Avatar src={'F'} alt={'F'} sx={{ mr: 2 }} />
-                            <Avatar src={'H'} alt={'H'} sx={{ mr: 2 }} />
-                        </Box>
+                        <Box
+  sx={{
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: 1.5,
+    mt: 2,
+    alignItems: 'center',
+  }}
+>
+  {/* Image Avatars */}
+  {[...Array(5)].map((_, i) => (
+    <Avatar
+      key={i}
+      src="/assets/image_one.png"
+      alt={`Avatar ${i + 1}`}
+      sx={{ width: 48, height: 48 }}
+    />
+  ))}
+
+  {/* Initial Avatars with tooltip */}
+  {[
+    { label: 'S', name: 'Sarah' },
+    { label: 'M', name: 'Michael' },
+  ].map((item, idx) => (
+    <Tooltip key={idx} title={item.name}>
+      <Avatar
+        sx={{
+          bgcolor: 'primary.main',
+          color: 'white',
+          width: 36,
+          height: 36,
+          fontWeight: 300,
+        }}
+      >
+        {item.label}
+      </Avatar>
+    </Tooltip>
+  ))}
+</Box>
                     </Stack>
                 </Grid>
                 <Grid size={{ xs: 12, md: 4 }}>
@@ -236,29 +268,40 @@ export default function DashboardView() {
                         <Typography variant="h3">New Deals</Typography>
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                             <Chip
-                                label="Custom delete icon"
-                                icon={<DomainVerification />}
-                                color="primary"
+                                label="Fruit2Go"
+                                icon={<GoogleMaterialIcon icon='add' />}
+                                color="#FFF7E8"
+                                sx={{ bgcolor: '#FFF7E8', color: 'primary.main' }}
                             />
                             <Chip
-                                label="Custom delete icon"
-                                icon={<DomainVerification />}
-                                color="primary"
+                                label="Marshall's MKT"
+                                icon={<GoogleMaterialIcon icon='add' />}
+                                color="#FFF7E8"
+                                sx={{ bgcolor: '#FFF7E8', color: 'primary.main' }}
                             />
-                            <Chip
-                                label="Custom delete icon"
-                                icon={<DomainVerification />}
-                                color="primary"
+                             <Chip
+                                label="CCNT"
+                                icon={<GoogleMaterialIcon icon='add' />}
+                                color="#FFF7E8"
+                                sx={{ bgcolor: '#FFF7E8', color: 'primary.main' }}
                             />
-                            <Chip
-                                label="Custom delete icon"
-                                icon={<DomainVerification />}
-                                color="primary"
+                             <Chip
+                                label="Target"
+                                icon={<GoogleMaterialIcon icon='add' />}
+                                color="#FFF7E8"
+                                sx={{ bgcolor: '#FFF7E8', color: 'primary.main' }}
                             />
-                            <Chip
-                                label="Custom delete icon"
-                                icon={<DomainVerification />}
-                                color="primary"
+                             <Chip
+                                label="Organic Place"
+                                icon={<GoogleMaterialIcon icon='add' />}
+                                color="#FFF7E8"
+                                sx={{ bgcolor: '#FFF7E8', color: 'primary.main' }}
+                            />
+                             <Chip
+                                label="Morello's"
+                                icon={<GoogleMaterialIcon icon='add' />}
+                                color="#FFF7E8"
+                                sx={{ bgcolor: '#FFF7E8', color: 'primary.main' }}
                             />
 
                         </Box>
